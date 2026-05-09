@@ -1,6 +1,6 @@
 ---
-// Server-rendered (not pre-built) so it can read env vars on each request.
-export const prerender = false;
+// Static page. The "Rebuild now" button POSTs to /api/rebuild, which is a
+// Cloudflare Pages Function defined in functions/api/rebuild.ts.
 ---
 <!DOCTYPE html>
 <html lang="en">

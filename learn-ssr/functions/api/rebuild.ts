@@ -1,33 +1,31 @@
-import type { APIRoute } from 'astro';
-
-export const prerender = false;
-
 /**
- * POST /api/rebuild
+ * Cloudflare Pages Function — POST /api/rebuild
+ *
  * Header: x-admin-token: <ADMIN_TOKEN>
  *
  * Forwards a POST to the Cloudflare Pages Deploy Hook URL stored in the
  * DEPLOY_HOOK_URL env var. This kicks off a fresh build of this site.
+ *
+ * Env vars (set in Pages → Settings → Variables and Secrets):
+ *   - ADMIN_TOKEN       (a long random string of your choice)
+ *   - DEPLOY_HOOK_URL   (from Pages → Settings → Builds & deployments → Deploy hooks)
  */
-export const POST: APIRoute = async ({ request, locals }) => {
-  // Cloudflare bindings live on `locals.runtime.env` when using the adapter.
-  const env: Record<string, string | undefined> =
-    // @ts-ignore - runtime is added by @astrojs/cloudflare
-    (locals as any)?.runtime?.env ?? (import.meta.env as any);
+interface Env {
+  ADMIN_TOKEN?: string;
+  DEPLOY_HOOK_URL?: string;
+}
 
-  const expected = env.ADMIN_TOKEN;
-  const hook = env.DEPLOY_HOOK_URL;
-
-  if (!expected || !hook) {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+  if (!env.ADMIN_TOKEN || !env.DEPLOY_HOOK_URL) {
     return new Response('Server missing ADMIN_TOKEN or DEPLOY_HOOK_URL', { status: 500 });
   }
 
   const provided = request.headers.get('x-admin-token') || '';
-  if (provided !== expected) {
+  if (provided !== env.ADMIN_TOKEN) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const r = await fetch(hook, { method: 'POST' });
+  const r = await fetch(env.DEPLOY_HOOK_URL, { method: 'POST' });
   const body = await r.text();
   if (!r.ok) {
     return new Response(`Deploy hook failed: ${r.status} ${body}`, { status: 502 });
