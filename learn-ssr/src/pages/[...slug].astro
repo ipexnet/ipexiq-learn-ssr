@@ -1,8 +1,6 @@
 ---
 import Chapter from '../layouts/Chapter.astro';
 
-const MANIFEST_URL = 'https://www.ipexiq.com/learn-manifest.json';
-
 interface ChapterMeta {
   slug: string;
   sourceUrl: string;
@@ -12,7 +10,7 @@ interface ChapterMeta {
 }
 
 export async function getStaticPaths() {
-  const res = await fetch(MANIFEST_URL, { cache: 'no-store' });
+  const res = await fetch('https://www.ipexiq.com/learn-manifest.json', { cache: 'no-store' });
   if (!res.ok) throw new Error(`Manifest fetch failed: ${res.status}`);
   const data = (await res.json()) as { chapters: ChapterMeta[] };
   return data.chapters.map((c) => ({
