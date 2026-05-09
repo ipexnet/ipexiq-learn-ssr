@@ -1,0 +1,75 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  image?: string;
+  selfUrl?: string;
+}
+const { title, description, canonical, image, selfUrl } = Astro.props;
+const ogImage = image ?? 'https://www.ipexiq.com/images/ipexiq_banner01.png';
+const ogUrl = selfUrl ?? canonical;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!--
+      Crawler-friendly redirect: humans get bounced via JS to the canonical
+      interactive page on www.ipexiq.com. We deliberately do NOT use
+      <meta http-equiv="refresh"> here because LinkedIn (and some other
+      scrapers) follow it and end up reading meta tags from the destination
+      page instead of from learn.ipexiq.com.
+    -->
+    <script is:inline define:vars={{ canonical }}>
+      // Skip the redirect for obvious bots so they can still inspect the page.
+      var ua = (navigator.userAgent || '').toLowerCase();
+      var isBot = /bot|crawler|spider|crawling|facebookexternalhit|linkedinbot|twitterbot|slackbot|discordbot|whatsapp|telegrambot|preview|embed/i.test(ua);
+      if (!isBot) {
+        window.location.replace(canonical);
+      }
+    </script>
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={ogUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="IPEXIQ" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ipexnet" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="stylesheet" href="https://www.ipexiq.com/assets/index.css" />
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 1100px; margin: 0 auto; padding: 1.5rem; color: #1a1a1a; line-height: 1.55; }
+      img { max-width: 100%; height: auto; }
+      header.site { display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+      header.site a { color: #0a66c2; text-decoration: none; font-weight: 600; }
+      footer.site { margin-top: 4rem; padding-top: 1rem; border-top: 1px solid #eee; color: #666; font-size: 0.9rem; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <a href="/">IPEXIQ — Learn</a>
+      <a href="https://www.ipexiq.com">Open the app →</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site">
+      © IPEXIQ. Want the interactive version? <a href={canonical}>Open in app</a>.
+    </footer>
+  </body>
+</html>

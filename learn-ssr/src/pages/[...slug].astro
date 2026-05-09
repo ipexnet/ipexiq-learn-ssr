@@ -1,0 +1,33 @@
+---
+import Chapter from '../layouts/Chapter.astro';
+import { chapters, type ChapterMeta } from '../data/chapters';
+
+export async function getStaticPaths() {
+  return chapters.map((c) => ({
+    params: { slug: c.slug || undefined },
+    props: { chapter: c },
+  }));
+}
+
+const { chapter } = Astro.props as { chapter: ChapterMeta };
+---
+<Chapter
+  title={chapter.title}
+  description={chapter.description}
+  canonical={chapter.sourceUrl}
+  image={chapter.image}
+  selfUrl={chapter.targetUrl}
+>
+  <h1>{chapter.title}</h1>
+  <p style="font-size:1.15rem;color:#555;">{chapter.description}</p>
+  <p style="margin-top:2rem;">
+    <a href={chapter.sourceUrl}
+       style="display:inline-block;background:#0a66c2;color:#fff;padding:0.75rem 1.25rem;border-radius:6px;text-decoration:none;font-weight:600;">
+      Open the interactive guide →
+    </a>
+  </p>
+  <p style="margin-top:1.5rem;color:#666;font-size:0.95rem;">
+    This page exists so social-media link previews show the right title, description and image.
+    The full interactive chapter lives on the main IPEXIQ app.
+  </p>
+</Chapter>
