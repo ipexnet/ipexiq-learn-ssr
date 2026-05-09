@@ -1,0 +1,23 @@
+---
+import Chapter from '../layouts/Chapter.astro';
+import { fetchAllChapters } from '../lib/fetchChapters';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const chapters = await fetchAllChapters();
+  return chapters.map((c) => ({
+    params: { slug: c.slug || undefined },
+    props: { chapter: c },
+  }));
+}
+
+const { chapter } = Astro.props;
+---
+<Chapter
+  title={chapter.title}
+  description={chapter.description}
+  canonical={chapter.sourceUrl}
+>
+  <Fragment set:html={chapter.bodyHtml} />
+</Chapter>
